@@ -1,0 +1,26 @@
+{
+  "extends": "@react-native/typescript-config",
+  "compilerOptions": {
+    /* ----- Strict Mode (blueprint mandate) ----- */
+    "strict": true,
+
+    /* ----- Path Aliases for clean imports ----- */
+    /* Instead of: import { UserRole } from '../../../core/constants/roles'
+       We write:    import { UserRole } from '@core/constants/roles'
+       This keeps imports readable and maintainable as the project grows. */
+    "baseUrl": ".",
+    "paths": {
+      "@core/*": ["src/core/*"],
+      "@data/*": ["src/data/*"],
+      "@domain/*": ["src/domain/*"],
+      "@store/*": ["src/store/*"],
+      "@screens/*": ["src/screens/*"],
+      "@components/*": ["src/components/*"],
+      "@navigation/*": ["src/navigation/*"]
+    },
+
+    "types": ["jest"]
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["**/node_modules", "**/Pods"]
+}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "518230288187",
+    "project_id": "uni-app-f2795",
+    "storage_bucket": "uni-app-f2795.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:518230288187:android:3ef8499f78a50dea9a791e",
+        "android_client_info": {
+          "package_name": "com.urft.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDULae1blSqWkoeeLlpTzyAQHhrb005UMQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
