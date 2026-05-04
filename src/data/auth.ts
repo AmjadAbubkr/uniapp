@@ -4,21 +4,22 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  User as FirebaseUser,
-} from '@react-native-firebase/auth';
+} from './firebase';
 import {
   doc,
   getDoc,
   setDoc,
   serverTimestamp,
-} from '@react-native-firebase/firestore';
+} from './firebase';
 import { COLLECTIONS } from '@core/constants/collections';
 import { User, UserRole } from '@domain/types';
 
 export const authService = {
   login: async (email: string, password: string): Promise<User> => {
     const result = await signInWithEmailAndPassword(auth, email, password);
-    return authService.getUserProfile(result.user.uid);
+    const profile = await authService.getUserProfile(result.user.uid);
+    if (!profile) throw new Error('User profile not found');
+    return profile;
   },
 
   register: async (
@@ -45,7 +46,7 @@ export const authService = {
   },
 
   logout: async (): Promise<void> => {
-    await signOut(auth);
+    await signOut();
   },
 
   getUserProfile: async (uid: string): Promise<User | null> => {
@@ -60,7 +61,7 @@ export const authService = {
   onAuthChange: (callback: (user: User | null) => void) => {
     return onAuthStateChanged(
       auth,
-      async (firebaseUser: FirebaseUser | null) => {
+      async (firebaseUser: any) => {
         if (firebaseUser) {
           const user = await authService.getUserProfile(firebaseUser.uid);
           callback(user);

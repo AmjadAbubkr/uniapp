@@ -12,12 +12,14 @@ export interface User {
 }
 
 export interface PendingUser {
-  id: string; // custom generated unique ID
+  id: string;
   name: string;
+  email: string;
   role: UserRole;
   facultyId: string;
-  createdBy: string; // uid of dean
+  createdBy: string;
   isRegistered: boolean;
+  invitationCode: string;
 }
 
 export interface Faculty {

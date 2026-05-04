@@ -1,5 +1,15 @@
-import { db } from './firebase';
-import { doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, collection, query, where } from '@react-native-firebase/firestore';
+import {
+  db,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+} from './firebase';
 import { COLLECTIONS } from '@core/constants/collections';
 import { Grade, Announcement } from '@domain/types';
 
@@ -87,6 +97,6 @@ export const announcementService = {
   },
 
   delete: async (id: string): Promise<void> => {
-    await deleteDoc(doc(db, COLLECTIONS.ANNOUNCEMENTS, id);
+    await deleteDoc(doc(db, COLLECTIONS.ANNOUNCEMENTS, id));
   },
 };
