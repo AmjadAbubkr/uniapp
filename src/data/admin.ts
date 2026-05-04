@@ -1,13 +1,13 @@
-import { db } from './firebase';
 import {
+  db,
+  collection,
   doc,
   getDoc,
   getDocs,
   setDoc,
   deleteDoc,
-  collection,
   query,
-} from '@react-native-firebase/firestore';
+} from './firebase';
 import { COLLECTIONS } from '@core/constants/collections';
 import { AuditLog } from '@domain/types';
 
@@ -39,7 +39,7 @@ export const auditLogService = {
     const snapshot = await getDocs(q);
     const logs = snapshot.docs
       .map((d: any) => ({ id: d.id, ...d.data() }) as AuditLog)
-      .filter(l => l.userId === userId)
+      .filter((l: AuditLog) => l.userId === userId)
       .slice(0, limit);
     return logs;
   },
@@ -48,7 +48,7 @@ export const auditLogService = {
     const snapshot = await getDocs(collection(db, COLLECTIONS.LOGS));
     return snapshot.docs
       .map((d: any) => ({ id: d.id, ...d.data() }) as AuditLog)
-      .sort((a, b) => b.createdAt - a.createdAt)
+      .sort((a: AuditLog, b: AuditLog) => b.createdAt - a.createdAt)
       .slice(0, limit);
   },
 };

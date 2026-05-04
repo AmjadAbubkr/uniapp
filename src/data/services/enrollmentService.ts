@@ -11,7 +11,7 @@ import {
   serverTimestamp,
 } from '@data/firebase';
 import { COLLECTIONS } from '@core/constants/collections';
-import { Enrollment } from '@domain/types';
+import { Enrollment, Subject } from '@domain/types';
 import { SubjectService } from './subjectService';
 import { mapDoc } from '@core/utils/firestore';
 import { LogService } from './logService';
@@ -41,7 +41,7 @@ export const EnrollmentService = {
 
   getByFaculty: async (facultyId: string) => {
     const subjects = await SubjectService.getByFaculty(facultyId);
-    const subjectIds = subjects.map(s => s.id);
+    const subjectIds = subjects.map((s: Subject) => s.id);
     if (subjectIds.length === 0) return [];
     const db = getFirestore();
     const results: Enrollment[] = [];
@@ -79,7 +79,7 @@ export const EnrollmentService = {
 
   createBatch: async (enrollments: Omit<Enrollment, 'id' | 'createdAt' | 'isActive'>[]) => {
     const db = getFirestore();
-    const batch = writeBatch(db);
+    const batch = writeBatch();
     const colRef = collection(db, COLLECTIONS.ENROLLMENTS);
     enrollments.forEach(e => {
       const ref = doc(colRef);

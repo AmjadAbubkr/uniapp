@@ -89,7 +89,7 @@ export const GradeService = {
       where('subjectId', '==', subjectId),
     );
     const snap = await getDocs(q);
-    const batch = writeBatch(db);
+    const batch = writeBatch();
     snap.docs.forEach(d => {
       batch.update(doc(db, COLLECTIONS.GRADES, d.id), { isPublished: true, updatedAt: serverTimestamp() });
     });

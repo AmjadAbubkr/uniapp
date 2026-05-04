@@ -40,7 +40,7 @@ export const AuthService = {
     const credential = await createUserWithEmailAndPassword(auth, email, password);
     const uid = credential.user.uid;
 
-    const batch = writeBatch(db);
+    const batch = writeBatch();
     batch.set(doc(db, COLLECTIONS.USERS, uid), {
       id: uid,
       name: pendingData.name,
@@ -67,7 +67,7 @@ export const AuthService = {
   logout: async () => {
     await configureFirebase();
     const auth = getAuth();
-    await signOut(auth);
+    await signOut();
   },
 
   onAuthStateChanged: (callback: (user: User | null) => void) => {

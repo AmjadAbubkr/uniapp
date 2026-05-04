@@ -41,7 +41,7 @@ const ManageDeansScreen = () => {
     const deansData = unwrapResult(deansR);
     const pendingData = unwrapResult(pendingR);
     setDeans(deansData ?? []);
-    setPending((pendingData ?? []).filter(p => p.role === UserRole.DEAN));
+    setPending((pendingData ?? []).filter((p: PendingUser) => p.role === UserRole.DEAN));
     setIsLoadingDeans(false);
   }, []);
 

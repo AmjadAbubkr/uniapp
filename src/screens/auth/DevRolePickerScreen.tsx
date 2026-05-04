@@ -35,7 +35,7 @@ const ROLE_CONFIG = [
 ];
 
 const DevRolePickerScreen = () => {
-  const { setDevUser, logout } = useAuthStore();
+  const { setUser, logout } = useAuthStore();
 
   const handleRolePick = (role: UserRole) => {
     const devUser: User = {
@@ -46,7 +46,7 @@ const DevRolePickerScreen = () => {
       isActive: true,
       createdAt: Date.now(),
     };
-    setDevUser(devUser);
+    setUser(devUser);
   };
 
   return (

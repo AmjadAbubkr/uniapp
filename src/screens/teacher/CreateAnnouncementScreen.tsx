@@ -23,14 +23,18 @@ const CreateAnnouncementScreen = ({ route, navigation }: any) => {
       Alert.alert('Error', 'Message is required');
       return;
     }
+    if (!user) {
+      Alert.alert('Error', 'Not authenticated. Please log in again.');
+      return;
+    }
     setIsSaving(true);
     try {
       const days = parseInt(expiresInDays, 10) || 7;
       await AnnouncementService.create({
         type,
         subjectId: type === 'subject' ? subjectId.trim() || null : null,
-        facultyId: user!.facultyId,
-        teacherId: user!.id,
+        facultyId: user.facultyId,
+        teacherId: user.id,
         message: message.trim(),
         expiresAt: Date.now() + days * 24 * 60 * 60 * 1000,
       });

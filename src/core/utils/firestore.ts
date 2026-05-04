@@ -20,7 +20,7 @@ export function normalizeDoc<T>(raw: T): T {
   return out as T;
 }
 
-export function mapDoc<T>(id: string, data: Record<string, any>): T {
+export function mapDoc<T>(id: string, data: Record<string, any> | undefined): T {
   const out = { id, ...data } as Record<string, unknown>;
   for (const key of TIMESTAMP_KEYS) {
     if (key in out && out[key] != null) {
