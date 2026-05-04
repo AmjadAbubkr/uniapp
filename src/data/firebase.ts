@@ -46,6 +46,17 @@ type DocRef = FirebaseFirestoreTypes.DocumentReference;
 
 export function collection(path: string, ...pathSegments: string[]): CollectionRef;
 export function collection(_firestore: any, path: string, ...pathSegments: string[]): CollectionRef;
+/**
+ * Resolve a Firestore collection reference from flexible path arguments.
+ *
+ * If `first` is a string, it is used as the first path segment and any `rest`
+ * segments are joined with '/' to form the collection path. If `first` is not
+ * a string, the function treats the `rest` arguments as the path segments.
+ *
+ * @param first - Either the collection path as the first segment or a non-string placeholder (commonly a Firestore instance) when using the alternate overload
+ * @param rest - Additional path segments to join with '/' to form the full collection path
+ * @returns The Firestore collection reference for the constructed path
+ */
 export function collection(first: any, ...rest: string[]): CollectionRef {
   if (typeof first === 'string') {
     const fullpath = rest.length > 0 ? [first, ...rest].join('/') : first;
@@ -58,6 +69,13 @@ export function collection(first: any, ...rest: string[]): CollectionRef {
 export function doc(path: string, ...pathSegments: string[]): DocRef;
 export function doc(collectionRef: CollectionRef): DocRef;
 export function doc(_firestore: any, path: string, ...pathSegments: string[]): DocRef;
+/**
+ * Obtain a Firestore document reference by path or from a collection reference.
+ *
+ * @param first - Either the first segment of a document path (string) or a collection reference when not a string
+ * @param rest - Additional path segments to append to `first` when `first` is a string
+ * @returns A document reference for the joined path, or a new document reference created from the provided collection reference
+ */
 export function doc(first: any, ...rest: string[]): DocRef {
   if (typeof first === 'string') {
     const fullpath = rest.length > 0 ? [first, ...rest].join('/') : first;

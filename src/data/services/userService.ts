@@ -18,6 +18,12 @@ import { UserRole } from '@core/constants/roles';
 import { mapDoc } from '@core/utils/firestore';
 import { LogService } from './logService';
 
+/**
+ * Builds an invitation code with a role-based prefix and a 4-character alphanumeric suffix.
+ *
+ * @param role - User role used to select the prefix: `STUDENT` -> `STU`, `TEACHER` -> `TCH`, `DEAN` -> `DEA`, otherwise `ADM`
+ * @returns The generated code in the form `PREFIX-XXXX` where `PREFIX` is as above and `XXXX` is four characters chosen from `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`
+ */
 function generateInvitationCode(role: UserRole): string {
   const prefix = role === UserRole.STUDENT ? 'STU' : role === UserRole.TEACHER ? 'TCH' : role === UserRole.DEAN ? 'DEA' : 'ADM';
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
