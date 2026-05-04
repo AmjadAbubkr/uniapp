@@ -1,0 +1,9 @@
+export { AuthService } from './authService';
+export { UserService } from './userService';
+export { FacultyService } from './facultyService';
+export { SubjectService } from './subjectService';
+export { EnrollmentService } from './enrollmentService';
+export { GradeService } from './gradeService';
+export { AnnouncementService } from './announcementService';
+export { LogService } from './logService';
+export { BackupService } from './backupService';
