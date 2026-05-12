@@ -6,15 +6,6 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      build_type:
-        description: "Build type (debug or release)"
-        required: false
-        default: debug
-        type: choice
-        options:
-          - debug
-          - release
 
 jobs:
   build:
@@ -63,29 +54,19 @@ jobs:
       - name: Enable long path support
         run: git config --global core.longpaths true
 
-      - name: Build debug APK
-        if: github.event.inputs.build_type != 'release'
+      - name: Build APKs
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
-
-      - name: Build release APK
-        if: github.event.inputs.build_type == 'release'
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
+          ./gradlew assembleDebug assembleRelease --no-daemon
 
       - name: Upload debug APK
-        if: github.event.inputs.build_type != 'release'
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload release APK
-        if: github.event.inputs.build_type == 'release'
         uses: actions/upload-artifact@v4
         with:
           name: app-release
