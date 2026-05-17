@@ -10,7 +10,6 @@ import {
   query,
   where,
   limit,
-  serverTimestamp,
 } from '@data/firebase';
 import { COLLECTIONS } from '@core/constants/collections';
 import { User, PendingUser } from '@domain/types';

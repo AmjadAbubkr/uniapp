@@ -9,10 +9,10 @@ import {
   doc,
   getDoc,
   setDoc,
-  serverTimestamp,
 } from './firebase';
 import { COLLECTIONS } from '@core/constants/collections';
 import { User, UserRole } from '@domain/types';
+import { mapDoc } from '@core/utils/firestore';
 
 export const authService = {
   login: async (email: string, password: string): Promise<User> => {
@@ -52,8 +52,7 @@ export const authService = {
   getUserProfile: async (uid: string): Promise<User | null> => {
     const docSnap = await getDoc(doc(db, COLLECTIONS.USERS, uid));
     if (docSnap.exists()) {
-      const data = docSnap.data();
-      return { id: uid, ...data } as User;
+      return mapDoc<User>(docSnap.id, docSnap.data());
     }
     return null;
   },

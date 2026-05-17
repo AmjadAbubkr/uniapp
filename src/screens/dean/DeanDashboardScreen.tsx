@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Button, FlatList } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, Button } from 'react-native';
 import { colors } from '@core/theme/colors';
 import { useAuthStore } from '@store/authStore';
 import {
-  facultyService,
-  subjectService,
-  userManagementService,
-} from '@data/dean';
+  FacultyService,
+  SubjectService,
+  UserService,
+} from '@data/services';
+import { UserRole } from '@core/constants/roles';
 import { Faculty, Subject, User } from '@domain/types';
 
 const DeanDashboardScreen = ({ navigation }: any) => {
@@ -14,29 +15,29 @@ const DeanDashboardScreen = ({ navigation }: any) => {
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [teachers, setTeachers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) loadData();
-  }, [user]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!user?.facultyId) return;
     try {
       const [facultiesData, subjectsData, teachersData] = await Promise.all([
-        facultyService.getAll(),
-        subjectService.getByFaculty(user.facultyId),
-        userManagementService.getTeachers(user.facultyId),
+        FacultyService.getAll(),
+        SubjectService.getByFaculty(user.facultyId),
+        UserService.getFacultyUsers(user.facultyId, UserRole.TEACHER),
       ]);
       setFaculties(facultiesData);
       setSubjects(subjectsData);
       setTeachers(teachersData);
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) loadData();
+  }, [user, loadData]);
 
   if (!user) return null;
 

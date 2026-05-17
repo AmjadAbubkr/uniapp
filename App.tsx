@@ -1,13 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { StatusBar, useColorScheme, View } from 'react-native';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 import AppNavigator from '@navigation/AppNavigator';
-import { SyncStatusBar } from '@components/common/SyncStatusBar';
-import { colors } from '@core/theme/colors';
 import { useAuthStore } from '@store/authStore';
+import { configureFirebase } from '@data/firebase';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -24,13 +23,17 @@ function AppContent() {
   const safeAreaInsets = useSafeAreaInsets();
   const initialize = useAuthStore(state => state.initialize);
 
-  useEffect(() => {
+  const init = useCallback(async () => {
+    await configureFirebase();
     initialize();
-  }, []);
+  }, [initialize]);
+
+  useEffect(() => {
+    init();
+  }, [init]);
 
   return (
     <View style={{ flex: 1, paddingTop: safeAreaInsets.top }}>
-      <SyncStatusBar />
       <AppNavigator />
     </View>
   );

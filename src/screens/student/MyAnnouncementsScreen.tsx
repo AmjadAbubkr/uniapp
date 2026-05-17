@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { colors } from '@core/theme/colors';
 import { useAuthStore } from '@store/authStore';
-import { announcementService } from '@data/teacher';
+import { AnnouncementService } from '@data/services';
 import { Announcement } from '@domain/types';
 
 const MyAnnouncementsScreen = () => {
@@ -17,25 +11,14 @@ const MyAnnouncementsScreen = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadAnnouncements();
-  }, []);
+    if (!user) return;
+    AnnouncementService.getForStudent(user.facultyId)
+      .then(data => setAnnouncements(data.filter(a => a.expiresAt > Date.now())))
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false));
+  }, [user]);
 
-  const loadAnnouncements = async () => {
-    try {
-      const data = await announcementService.getAll();
-      setAnnouncements(
-        data.filter(
-          a =>
-            (a.facultyId === user?.facultyId || !a.facultyId) &&
-            a.expiresAt > Date.now(),
-        ),
-      );
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (!user) return null;
 
   return (
     <View style={styles.container}>
@@ -65,18 +48,8 @@ const MyAnnouncementsScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface, padding: 16 },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.onSurface,
-    marginBottom: 16,
-  },
-  card: {
-    backgroundColor: colors.surfaceContainerHigh,
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
+  title: { fontSize: 24, fontWeight: 'bold', color: colors.onSurface, marginBottom: 16 },
+  card: { backgroundColor: colors.surfaceContainerHigh, padding: 16, borderRadius: 8, marginBottom: 8 },
   message: { fontSize: 16, color: colors.onSurface, marginBottom: 8 },
   date: { fontSize: 12, color: colors.onSurfaceVariant },
   empty: { textAlign: 'center', color: colors.onSurfaceVariant, marginTop: 24 },

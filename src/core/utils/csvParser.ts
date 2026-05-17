@@ -1,6 +1,5 @@
 import { UserRole } from '@domain/types';
-import { enrollmentService } from '@data/dean';
-import { authService } from '@data/auth';
+import { UserService } from '@data/services';
 
 export interface CSVRow {
   name: string;
@@ -51,26 +50,16 @@ export const importUsersFromCSV = async (
 
   for (const row of rows) {
     try {
-      if (row.role === 'student') {
-        // Create pending student for dean to approve
-        await enrollmentService.enrollStudent(
-          row.email,
-          row.name,
-          facultyId,
-          createdBy,
-        );
-        success++;
-      } else if (row.role === 'teacher') {
-        // Create pending teacher
-        await enrollmentService.enrollStudent(
-          row.email,
-          row.name,
-          facultyId,
-          createdBy,
-        );
-        success++;
-      }
-    } catch (error) {
+      const role = row.role === 'teacher' ? UserRole.TEACHER : UserRole.STUDENT;
+      await UserService.createPendingUser({
+        name: row.name,
+        email: row.email,
+        role,
+        facultyId,
+        createdBy,
+      }, createdBy);
+      success++;
+    } catch {
       failed++;
     }
   }

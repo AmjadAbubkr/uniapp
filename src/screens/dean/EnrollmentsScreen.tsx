@@ -1,26 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Button,
-  Alert,
-  TextInput,
-} from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Button, Alert, TextInput } from 'react-native';
 import { colors } from '@core/theme/colors';
 import { useAuthStore } from '@store/authStore';
-import { enrollmentService } from '@data/dean';
-import { Enrollment, Subject } from '@domain/types';
+import { EnrollmentService } from '@data/services';
 
 const EnrollmentsScreen = () => {
   const { user } = useAuthStore();
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [studentId, setStudentId] = useState('');
   const [subjectId, setSubjectId] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {}, []);
 
   const handleEnroll = async () => {
     if (!studentId || !subjectId) {
@@ -28,14 +15,21 @@ const EnrollmentsScreen = () => {
       return;
     }
     try {
-      await enrollmentService.enroll(studentId, subjectId, '', '');
+      await EnrollmentService.create({
+        studentId,
+        subjectId,
+        academicYearId: '',
+        semesterId: '',
+      });
       Alert.alert('Success', 'Student enrolled');
       setStudentId('');
       setSubjectId('');
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to enroll');
     }
   };
+
+  if (!user) return null;
 
   return (
     <View style={styles.container}>
@@ -59,20 +53,8 @@ const EnrollmentsScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface, padding: 16 },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.onSurface,
-    marginBottom: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.outline,
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
-    color: colors.onSurface,
-  },
+  title: { fontSize: 24, fontWeight: 'bold', color: colors.onSurface, marginBottom: 16 },
+  input: { borderWidth: 1, borderColor: colors.outline, borderRadius: 8, padding: 12, marginBottom: 12, color: colors.onSurface },
 });
 
 export default EnrollmentsScreen;

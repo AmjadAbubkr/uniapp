@@ -1,11 +1,9 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { colors } from '@core/theme/colors';
 import { Typography } from '@core/theme/typography';
 
 import {
-  RootStackParamList,
   AuthStackParamList,
   DeanStackParamList,
   TeacherStackParamList,
@@ -35,13 +33,11 @@ import AdminDashboardScreen from '@screens/admin/AdminDashboardScreen';
 import AuditLogsScreen from '@screens/admin/AuditLogsScreen';
 import BackupsScreen from '@screens/admin/BackupsScreen';
 
-const RootStack = createStackNavigator<RootStackParamList>();
 const AuthStack = createStackNavigator<AuthStackParamList>();
 const DeanStack = createStackNavigator<DeanStackParamList>();
 const TeacherStack = createStackNavigator<TeacherStackParamList>();
 const StudentStack = createStackNavigator<StudentStackParamList>();
 const AdminStack = createStackNavigator<AdminStackParamList>();
-const Tab = createBottomTabNavigator();
 
 const screenOptions = {
   headerStyle: { backgroundColor: colors.surfaceContainer },

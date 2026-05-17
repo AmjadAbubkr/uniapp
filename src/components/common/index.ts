@@ -4,7 +4,6 @@ export { Card } from './Card';
 export { LoadingScreen } from './LoadingScreen';
 export { AppModal } from './AppModal';
 export { PaginatedList } from './PaginatedList';
-export { SyncStatusBar } from './SyncStatusBar';
 export { SectionHeader } from './SectionHeader';
 export { Badge } from './Badge';
 export { EmptyState } from './EmptyState';
