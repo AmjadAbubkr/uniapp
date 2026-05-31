@@ -1,50 +1,56 @@
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  orderBy,
-  limit,
-  serverTimestamp,
-} from '@data/firebase';
-import { COLLECTIONS } from '@core/constants/collections';
+/**
+ * LogService — backward-compatible wrapper around AuditModule.
+ *
+ * Existing code can continue using LogService while new code uses AuditModule directly.
+ * This maintains backward compatibility while the codebase transitions.
+ */
+
+import { AuditModule, AuditEntry, AuditQueryOptions } from '@core/audit';
 import { AuditLog } from '@domain/types';
-import { mapDoc } from '@core/utils/firestore';
 
 export const LogService = {
-  create: async (data: Omit<AuditLog, 'id' | 'createdAt'>) => {
-    const db = getFirestore();
-    await addDoc(collection(db, COLLECTIONS.LOGS), {
-      ...data,
-      createdAt: serverTimestamp(),
-    });
+  logAction: (
+    userId: string,
+    action: string,
+    targetId: string,
+    metadata?: Record<string, any>,
+  ): void => {
+    AuditModule.log(userId, action, targetId, metadata);
   },
 
-  logAction: (userId: string, action: string, targetId: string, metadata?: Record<string, any>) => {
-    LogService.create({ userId, action, targetId, metadata: metadata ?? {} }).catch(() => {});
+  create: async (data: Omit<AuditLog, 'id' | 'createdAt'>): Promise<void> => {
+    AuditModule.log(data.userId, data.action, data.targetId, data.metadata);
   },
 
-  getAll: async (maxLimit = 50) => {
-    const db = getFirestore();
-    const q = query(
-      collection(db, COLLECTIONS.LOGS),
-      orderBy('createdAt', 'desc'),
-      limit(maxLimit),
-    );
-    const snap = await getDocs(q);
-    return snap.docs.map(d => mapDoc<AuditLog>(d.id, d.data()));
+  getAll: async (maxLimit = 50): Promise<AuditEntry[]> => {
+    return AuditModule.getRecent(maxLimit);
   },
 
-  getByUser: async (userId: string) => {
-    const db = getFirestore();
-    const q = query(
-      collection(db, COLLECTIONS.LOGS),
-      where('userId', '==', userId),
-      orderBy('createdAt', 'desc'),
-    );
-    const snap = await getDocs(q);
-    return snap.docs.map(d => mapDoc<AuditLog>(d.id, d.data()));
+  getByUser: async (userId: string): Promise<AuditEntry[]> => {
+    return AuditModule.getByUser(userId);
+  },
+
+  getByAction: async (action: string, limit: number = 50): Promise<AuditEntry[]> => {
+    return AuditModule.getByAction(action, limit);
+  },
+
+  getRecent: async (limit: number = 50): Promise<AuditEntry[]> => {
+    return AuditModule.getRecent(limit);
+  },
+
+  getErrors: async (limit: number = 50): Promise<AuditEntry[]> => {
+    return AuditModule.getErrors(limit);
+  },
+
+  query: async (options: AuditQueryOptions): Promise<AuditEntry[]> => {
+    return AuditModule.query(options);
+  },
+
+  exportCSV: async (options?: AuditQueryOptions): Promise<string> => {
+    return AuditModule.exportCSV(options);
+  },
+
+  count: async (options?: AuditQueryOptions): Promise<number> => {
+    return AuditModule.count(options);
   },
 };
