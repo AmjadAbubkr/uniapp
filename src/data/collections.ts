@@ -1,0 +1,15 @@
+export const COLLECTIONS = {
+  USERS: 'users',
+  STUDENTS: 'students',
+  TEACHERS: 'teachers',
+  DEANS: 'deans',
+  SUBJECTS: 'subjects',
+  COURSES: 'courses',
+  ENROLLMENTS: 'enrollments',
+  GRADES: 'grades',
+  ANNOUNCEMENTS: 'announcements',
+  FACULTIES: 'faculties',
+  DEPARTMENTS: 'departments',
+  SCHEDULES: 'schedules',
+  LOGS: 'logs',
+} as const;

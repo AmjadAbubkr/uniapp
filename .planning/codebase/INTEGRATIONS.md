@@ -1,31 +1,35 @@
 # External Integrations
-**Analysis Date:** 2026-05-04
+**Analysis Date:** 2026-06-03
 
 ## APIs & External Services
 
-**None detected — no source files or configuration present.**
-
-No SDK imports, API client libraries, or service connection code found. The project directory is empty and has not been initialized yet.
+**Firebase Auth:**
+- Provider: Email/password authentication
+- SDK: @react-native-firebase/auth ^21.0.0 (native SDK)
+- Purpose: User identity management, login, logout, auth state observation
 
 ## Data Storage
 
 **Databases:**
-- None configured — no database client, ORM config, or migration files detected
-- No connection string patterns found in any configuration
+- Firebase Firestore (primary database)
+- 13 collections: users, students, teachers, deans, subjects, courses, enrollments, grades, announcements, faculties, departments, schedules, logs
+- Offline persistence enabled via native SDK settings
 
 **File Storage:**
 - None configured
 
 **Caching:**
-- None configured
+- Firestore offline persistence (local cache)
 
 ## Authentication & Identity
 
 **Auth Provider:**
-- Not yet implemented — no auth middleware, token handling, or identity provider configuration found
+- Firebase Auth (email/password)
+- Native SDK reads google-services.json (Android) / GoogleService-Info.plist (iOS)
 
 **Implementation:**
-- Not yet selected
+- @react-native-firebase/auth — native SDK
+- Auth state managed via Zustand authStore
 
 ## Monitoring & Observability
 
@@ -33,44 +37,42 @@ No SDK imports, API client libraries, or service connection code found. The proj
 - None
 
 **Logs:**
-- No logging framework configured
+- Console logging only (console.error, console.warn)
+- Firestore-based audit trail (COLLECTIONS.LOGS) for business actions
 
 ## CI/CD & Deployment
 
 **Hosting:**
-- Not configured
+- Not configured — Expo managed workflow with development builds
 
 **CI Pipeline:**
-- None — no `.github/workflows/`, `.gitlab-ci.yml`, `Jenkinsfile`, or similar CI config found
+- None
 
 ## Environment Configuration
 
 **Required env vars:**
-- None defined yet — no `.env` files or `.env.example` present
+- EXPO_PUBLIC_FIREBASE_API_KEY
+- EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN
+- EXPO_PUBLIC_FIREBASE_PROJECT_ID
+- EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET
+- EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+- EXPO_PUBLIC_FIREBASE_APP_ID
+
+**Platform config files:**
+- android/app/google-services.json (Android)
+- ios/GoogleService-Info.plist (iOS)
 
 **Secrets location:**
-- Not configured
+- .env (gitignored); .env.example documents required vars
 
-## Webhooks & Callbacks
+## Not Yet Integrated
 
-**Incoming:**
-- None
-
-**Outgoing:**
-- None
-
-## Recommendations for University Management System
-
-Based on the project name, the following integrations should be planned:
-
-1. **Database**: Relational database (PostgreSQL recommended) for structured entities — students, courses, departments, enrollments, grades
-2. **Auth**: SSO/LDAP integration common in university settings; consider SAML 2.0 or OIDC for institutional identity federation
-3. **Email**: Transactional email service (e.g., SendGrid, AWS SES) for notifications — enrollment confirmations, grade postings, password resets
-4. **File Storage**: Object storage for document management — transcripts, assignments, syllabi (e.g., S3-compatible storage)
-5. **Payment**: Payment gateway if handling tuition/fees (e.g., Stripe)
-6. **Calendar**: Calendar integration for scheduling (e.g., iCal export, Google Calendar API)
-7. **Notification**: Push notification or SMS service for time-sensitive alerts
-8. **Audit Logging**: Comprehensive audit trail for compliance — grade changes, enrollment modifications
+- Email service (SendGrid, AWS SES) — for notifications
+- File storage (Firebase Storage, S3) — for documents
+- Payment gateway (Stripe) — for tuition/fees
+- SSO/LDAP (SAML 2.0, OIDC) — for institutional identity
+- Push notifications (FCM) — for alerts
+- CI/CD (GitHub Actions, EAS Build) — for automated builds
 
 ---
-*Integration audit: 2026-05-04*
+*Integration audit: 2026-06-03*

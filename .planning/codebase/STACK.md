@@ -1,70 +1,77 @@
 # Technology Stack
-**Analysis Date:** 2026-05-04
+**Analysis Date:** 2026-06-03
 
 ## Languages
 
 **Primary:**
-- Not yet selected — no source files present
+- TypeScript (strict mode enabled)
 
 **Secondary:**
-- None detected
+- None
 
 ## Runtime
 
 **Environment:**
-- Not yet configured — no runtime version files found (no `.nvmrc`, `.python-version`, `.tool-versions`)
+- React Native with Expo managed workflow (~52.0.0)
+- React 18.3.1, React Native 0.76.6
 
 **Package Manager:**
-- Not yet initialized — no `package.json`, `requirements.txt`, `pyproject.toml`, `Cargo.toml`, or `go.mod` found
-- Lockfile: Not present
+- npm (package.json)
+- Lockfile: package-lock.json
 
 ## Frameworks
 
 **Core:**
-- Not yet selected
+- Expo SDK ~52 (managed workflow with development builds)
+- React Navigation v6 (native stack navigator)
+- Zustand v5 (client state management)
 
 **Testing:**
-- Not yet selected
+- Not yet configured
 
 **Build/Dev:**
-- Not yet selected
+- Expo CLI (`expo start`, `expo run:android`, `expo run:ios`)
 
 ## Key Dependencies
 
 **Critical:**
-- None — no dependency manifest files exist
+- `@react-native-firebase/app` ^21.0.0 — Firebase core initialization
+- `@react-native-firebase/auth` ^21.0.0 — Email/password authentication
+- `@react-native-firebase/firestore` ^21.0.0 — Primary database
 
-**Infrastructure:**
-- None
+**Navigation:**
+- `@react-navigation/native` ^7.0.0
+- `@react-navigation/native-stack` ^7.0.0
+- `react-native-screens` ^4.0.0
+- `react-native-safe-area-context` ^5.0.0
+
+**State:**
+- `zustand` ^5.0.0
 
 ## Configuration
 
 **Environment:**
-- No `.env` files or configuration files detected
-- No config directory structure present
+- `EXPO_PUBLIC_FIREBASE_API_KEY`
+- `EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN`
+- `EXPO_PUBLIC_FIREBASE_PROJECT_ID`
+- `EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET`
+- `EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+- `EXPO_PUBLIC_FIREBASE_APP_ID`
 
 **Build:**
-- No build configuration files detected (`tsconfig.json`, `webpack.config.*`, `vite.config.*`, etc.)
+- `tsconfig.json` — React Native TypeScript config with `@/*` path alias
+- `app.json` — Expo config with Firebase plugins
 
 ## Platform Requirements
 
 **Development:**
-- No platform constraints defined yet — project directory is empty
+- Node.js 18+
+- Expo CLI
+- Android Studio / Xcode for native builds
 
 **Production:**
-- No deployment target configured
-
-## Recommendations for Setup
-
-Since this is a greenfield project (university-management-system), the following decisions need to be made before stack selection:
-
-1. **Language**: Choose primary language based on team expertise and project requirements (e.g., TypeScript/Node.js, Python, Java, Go)
-2. **Framework**: Select web framework appropriate for a university management system (e.g., Next.js, Django, Spring Boot, Express)
-3. **Database**: Choose relational database for structured university data (e.g., PostgreSQL, MySQL)
-4. **ORM**: Select data access layer (e.g., Prisma, SQLAlchemy, TypeORM, Hibernate)
-5. **Auth**: Decide on authentication strategy (e.g., OAuth2/OIDC via Keycloak, Auth0, or custom JWT)
-6. **Testing**: Set up testing framework from day one (e.g., Vitest/Jest for JS, pytest for Python)
-7. **CI/CD**: Configure pipeline early (e.g., GitHub Actions, GitLab CI)
+- Android (google-services.json required)
+- iOS (GoogleService-Info.plist required)
 
 ---
-*Stack analysis: 2026-05-04*
+*Stack analysis: 2026-06-03*

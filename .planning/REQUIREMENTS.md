@@ -56,3 +56,26 @@
 - STACK.md reflects actual React Native + Firebase stack
 - CONCERNS.md updated with real issues (not greenfield placeholders)
 - ARCHITECTURE.md updated for React Native mobile architecture (not web server)
+
+## FIX-07: Type Contract & Boundary Cleanliness
+**Priority:** Critical
+**Description:** Eliminate type duplication, unchecked casts, and `any` usage at model boundaries that undermine type safety across the codebase.
+**Acceptance Criteria:**
+- AuthUser interface removed from authStore — uses Pick<User, ...> derivation instead
+- Duplicated profile-mapping logic in authStore extracted to a single toAuthUser() function
+- No `any` on timestamp fields in user.ts or enrollment.ts (use Firestore Timestamp type)
+- No `as UserRole` cast at auth boundary — validate role enum membership instead
+- PendingUser.createdBy field removed (redundant with adminId parameter)
+- findUserByEmail returns typed User | null instead of untyped object
+- getErrorMessage(error: unknown): string utility replaces all error: any catch blocks
+- ManageDeansScreen uses user.id from hook selector (not useAuthStore.getState() dual read)
+
+## FIX-08: Structural Simplification
+**Priority:** High
+**Description:** Replace ad-hoc branching with declarative patterns, enforce singleton usage, and extract duplicated form styles.
+**Acceptance Criteria:**
+- AppNavigator switch statement replaced with ROLE_STACKS static record lookup
+- All services import db/firebaseAuth singletons from firebase.ts (no direct firestore()/auth() calls)
+- Shared form styles extracted to src/theme/forms.ts
+- LogService.logAction userId and entityId are required (no empty string acceptance)
+- All screen files with form styles import from shared forms.ts
