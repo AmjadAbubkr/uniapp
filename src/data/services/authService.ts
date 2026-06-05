@@ -6,7 +6,6 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   getFirestore,
-  collection,
   doc,
   getDoc,
   writeBatch,
@@ -66,7 +65,7 @@ export const AuthService = {
 
   logout: async () => {
     await configureFirebase();
-    const auth = getAuth();
+    getAuth();
     await signOut();
   },
 

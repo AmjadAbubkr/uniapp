@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { colors } from '@core/theme/colors';
-import { backupService } from '@data/admin';
+import { BackupService } from '@data/services';
 
 const BackupsScreen = () => {
   const [backups, setBackups] = useState<any[]>([]);
@@ -21,7 +21,7 @@ const BackupsScreen = () => {
 
   const loadBackups = async () => {
     try {
-      const data = await backupService.getBackups();
+      const data = await BackupService.getAll();
       setBackups(data);
     } catch (error) {
       console.error(error);
@@ -33,10 +33,10 @@ const BackupsScreen = () => {
   const handleCreateBackup = async () => {
     setLoading(true);
     try {
-      await backupService.createBackup();
+      await BackupService.create();
       Alert.alert('Success', 'Backup created');
       loadBackups();
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed');
     } finally {
       setLoading(false);

@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { colors } from '@core/theme/colors';
-import { auditLogService } from '@data/admin';
+import { LogService } from '@data/services';
 import { AuditLog } from '@domain/types';
 
 const AuditLogsScreen = () => {
@@ -20,7 +20,7 @@ const AuditLogsScreen = () => {
 
   const loadLogs = async () => {
     try {
-      const data = await auditLogService.getAll(50);
+      const data = await LogService.getAll(50);
       setLogs(data);
     } catch (error) {
       console.error(error);

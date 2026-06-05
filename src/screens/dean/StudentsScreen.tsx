@@ -2,29 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Alert } from 'react-native';
 import { colors } from '@core/theme/colors';
 import { useAuthStore } from '@store/authStore';
-import { userManagementService } from '@data/dean';
+import { UserService } from '@data/services';
+import { UserRole } from '@core/constants/roles';
 import { User } from '@domain/types';
 
 const StudentsScreen = () => {
   const { user } = useAuthStore();
   const [students, setStudents] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadStudents();
-  }, []);
+    if (!user) return;
+    UserService.getFacultyUsers(user.facultyId, UserRole.STUDENT)
+      .then(data => setStudents(data))
+      .catch(() => Alert.alert('Error', 'Failed to load'));
+  }, [user]);
 
-  const loadStudents = async () => {
-    if (!user?.facultyId) return;
-    try {
-      const data = await userManagementService.getStudents(user.facultyId);
-      setStudents(data);
-    } catch (error) {
-      Alert.alert('Error', 'Failed to load');
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (!user) return null;
 
   return (
     <View style={styles.container}>
@@ -46,18 +39,8 @@ const StudentsScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface, padding: 16 },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.onSurface,
-    marginBottom: 16,
-  },
-  card: {
-    backgroundColor: colors.surfaceContainerHigh,
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
+  title: { fontSize: 24, fontWeight: 'bold', color: colors.onSurface, marginBottom: 16 },
+  card: { backgroundColor: colors.surfaceContainerHigh, padding: 16, borderRadius: 8, marginBottom: 8 },
   name: { fontSize: 16, fontWeight: 'bold', color: colors.onSurface },
   email: { fontSize: 14, color: colors.onSurfaceVariant },
   empty: { textAlign: 'center', color: colors.onSurfaceVariant, marginTop: 24 },

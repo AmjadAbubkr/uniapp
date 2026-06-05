@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import { colors } from '@core/theme/colors';
 import { useAuthStore } from '@store/authStore';
-import { auditLogService, backupService } from '@data/admin';
+import { LogService } from '@data/services';
 
 const AdminDashboardScreen = ({ navigation }: any) => {
   const { user, logout } = useAuthStore();
@@ -14,7 +14,7 @@ const AdminDashboardScreen = ({ navigation }: any) => {
 
   const loadStats = async () => {
     try {
-      const logs = await auditLogService.getAll(100);
+      const logs = await LogService.getAll(100);
       setLogsCount(logs.length);
     } catch (error) {
       console.error(error);

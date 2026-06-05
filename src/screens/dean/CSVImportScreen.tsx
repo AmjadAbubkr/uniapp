@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { colors } from '@core/theme/colors';
-import { parseCSV, importUsersFromCSV, CSVRow } from '@core/utils/csvParser';
+import { parseCSV, importUsersFromCSV } from '@core/utils/csvParser';
 import { useAuthStore } from '@store/authStore';
 
 const CSVImportScreen = () => {

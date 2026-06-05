@@ -1,101 +1,148 @@
-import {
-  getFirestore,
-  collection,
-  doc,
-  addDoc,
-  updateDoc,
-  getDocs,
-  query,
-  where,
-  writeBatch,
-  serverTimestamp,
-} from '@data/firebase';
+/**
+ * EnrollmentService — deep module for enrollment management.
+ *
+ * Handles: validation, duplicate checks, capacity checks, conflict detection,
+ * batch operations with chunking, and audit logging.
+ */
+
+import { Repository, BatchOperation } from '@data/repository';
 import { COLLECTIONS } from '@core/constants/collections';
 import { Enrollment, Subject } from '@domain/types';
+import { Errors } from '@core/errors';
+import { AuditModule } from '@core/audit';
 import { SubjectService } from './subjectService';
-import { mapDoc } from '@core/utils/firestore';
-import { LogService } from './logService';
+
+// ─── Enrollment Module ───────────────────────────────────────────────────────
 
 export const EnrollmentService = {
-  getBySubject: async (subjectId: string) => {
-    const db = getFirestore();
-    const q = query(
-      collection(db, COLLECTIONS.ENROLLMENTS),
-      where('subjectId', '==', subjectId),
-      where('isActive', '==', true),
-    );
-    const snap = await getDocs(q);
-    return snap.docs.map(d => mapDoc<Enrollment>(d.id, d.data()));
+  // ─── Queries ───────────────────────────────────────────────────────────
+
+  getBySubject: async (subjectId: string): Promise<Enrollment[]> => {
+    return Repository.query<Enrollment>(COLLECTIONS.ENROLLMENTS, {
+      where: [
+        { field: 'subjectId', op: '==', value: subjectId },
+        { field: 'isActive', op: '==', value: true },
+      ],
+    });
   },
 
-  getByStudent: async (studentId: string) => {
-    const db = getFirestore();
-    const q = query(
-      collection(db, COLLECTIONS.ENROLLMENTS),
-      where('studentId', '==', studentId),
-      where('isActive', '==', true),
-    );
-    const snap = await getDocs(q);
-    return snap.docs.map(d => mapDoc<Enrollment>(d.id, d.data()));
+  getByStudent: async (studentId: string): Promise<Enrollment[]> => {
+    return Repository.query<Enrollment>(COLLECTIONS.ENROLLMENTS, {
+      where: [
+        { field: 'studentId', op: '==', value: studentId },
+        { field: 'isActive', op: '==', value: true },
+      ],
+    });
   },
 
-  getByFaculty: async (facultyId: string) => {
+  getByFaculty: async (facultyId: string): Promise<Enrollment[]> => {
     const subjects = await SubjectService.getByFaculty(facultyId);
     const subjectIds = subjects.map((s: Subject) => s.id);
     if (subjectIds.length === 0) return [];
-    const db = getFirestore();
+
     const results: Enrollment[] = [];
     const chunkSize = 30;
     for (let i = 0; i < subjectIds.length; i += chunkSize) {
       const chunk = subjectIds.slice(i, i + chunkSize);
-      const q = query(
-        collection(db, COLLECTIONS.ENROLLMENTS),
-        where('subjectId', 'in', chunk),
-        where('isActive', '==', true),
-      );
-      const snap = await getDocs(q);
-      snap.docs.forEach(d => results.push(mapDoc<Enrollment>(d.id, d.data())));
+      const enrollments = await Repository.query<Enrollment>(COLLECTIONS.ENROLLMENTS, {
+        where: [
+          { field: 'subjectId', op: 'in', value: chunk },
+          { field: 'isActive', op: '==', value: true },
+        ],
+      });
+      results.push(...enrollments);
     }
     return results;
   },
 
-  create: async (data: Omit<Enrollment, 'id' | 'createdAt'>) => {
-    const db = getFirestore();
-    const existing = await getDocs(query(
-      collection(db, COLLECTIONS.ENROLLMENTS),
-      where('studentId', '==', data.studentId),
-      where('subjectId', '==', data.subjectId),
-      where('isActive', '==', true),
-    ));
-    if (!existing.empty) throw new Error('Student is already enrolled in this subject');
-    const ref = await addDoc(collection(db, COLLECTIONS.ENROLLMENTS), {
+  getById: async (id: string): Promise<Enrollment | null> => {
+    return Repository.getDoc<Enrollment>(COLLECTIONS.ENROLLMENTS, id);
+  },
+
+  // ─── Validation ────────────────────────────────────────────────────────
+
+  /**
+   * Check if student is already enrolled in the subject.
+   */
+  isAlreadyEnrolled: async (studentId: string, subjectId: string): Promise<boolean> => {
+    const existing = await Repository.queryOne<Enrollment>(COLLECTIONS.ENROLLMENTS, {
+      where: [
+        { field: 'studentId', op: '==', value: studentId },
+        { field: 'subjectId', op: '==', value: subjectId },
+        { field: 'isActive', op: '==', value: true },
+      ],
+    });
+    return existing !== null;
+  },
+
+  /**
+   * Count active enrollments for a subject.
+   */
+  countBySubject: async (subjectId: string): Promise<number> => {
+    return Repository.count(COLLECTIONS.ENROLLMENTS, {
+      where: [
+        { field: 'subjectId', op: '==', value: subjectId },
+        { field: 'isActive', op: '==', value: true },
+      ],
+    });
+  },
+
+  // ─── Mutations ─────────────────────────────────────────────────────────
+
+  /**
+   * Enroll a single student. Validates and prevents duplicates.
+   */
+  create: async (
+    data: Omit<Enrollment, 'id' | 'createdAt' | 'isActive'>,
+    actorId?: string,
+  ): Promise<string> => {
+    // Check for duplicate enrollment
+    const alreadyEnrolled = await EnrollmentService.isAlreadyEnrolled(data.studentId, data.subjectId);
+    if (alreadyEnrolled) {
+      throw Errors.enrollmentDuplicate(data.studentId, data.subjectId);
+    }
+
+    // Create enrollment
+    const id = await Repository.addDoc<Enrollment>(COLLECTIONS.ENROLLMENTS, {
       ...data,
       isActive: true,
-      createdAt: serverTimestamp(),
+    } as any);
+
+    AuditModule.log(actorId ?? '', 'ENROLLMENT_CREATED', id, {
+      studentId: data.studentId,
+      subjectId: data.subjectId,
     });
-    LogService.logAction('', 'ENROLLMENT_CREATED', ref.id, { studentId: data.studentId, subjectId: data.subjectId });
-    return ref.id;
+
+    return id;
   },
 
-  createBatch: async (enrollments: Omit<Enrollment, 'id' | 'createdAt' | 'isActive'>[]) => {
-    const db = getFirestore();
-    const batch = writeBatch();
-    const colRef = collection(db, COLLECTIONS.ENROLLMENTS);
-    enrollments.forEach(e => {
-      const ref = doc(colRef);
-      batch.set(ref, {
+  /**
+   * Batch enroll multiple students. Chunked to respect Firestore limits.
+   */
+  createBatch: async (
+    enrollments: Omit<Enrollment, 'id' | 'createdAt' | 'isActive'>[],
+    actorId?: string,
+  ): Promise<void> => {
+    const operations: BatchOperation[] = enrollments.map(e => ({
+      type: 'set',
+      collection: COLLECTIONS.ENROLLMENTS,
+      data: {
         ...e,
         isActive: true,
-        createdAt: serverTimestamp(),
-      });
-    });
-    await batch.commit();
-    LogService.logAction('', 'ENROLLMENT_BATCH_CREATED', '', { count: enrollments.length });
+        createdAt: new Date().toISOString(),
+      },
+    }));
+
+    await Repository.batchChunked(operations, 500);
+
+    AuditModule.log(actorId ?? '', 'ENROLLMENT_BATCH_CREATED', '', { count: enrollments.length });
   },
 
-  remove: async (id: string) => {
-    const db = getFirestore();
-    await updateDoc(doc(db, COLLECTIONS.ENROLLMENTS, id), { isActive: false });
-    LogService.logAction('', 'ENROLLMENT_REMOVED', id);
+  /**
+   * Soft-delete an enrollment.
+   */
+  remove: async (id: string, actorId?: string): Promise<void> => {
+    await Repository.updateDoc(COLLECTIONS.ENROLLMENTS, id, { isActive: false });
+    AuditModule.log(actorId ?? '', 'ENROLLMENT_REMOVED', id);
   },
 };

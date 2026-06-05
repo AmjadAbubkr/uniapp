@@ -1,90 +1,77 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  Button,
-  Alert,
-  FlatList,
-} from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { colors } from '@core/theme/colors';
 import { useAuthStore } from '@store/authStore';
-import { announcementService } from '@data/teacher';
+import { AnnouncementService } from '@data/services';
+import { Announcement } from '@domain/types';
+import { Card } from '@components/common/Card';
+import { EmptyState } from '@components/common/EmptyState';
+import { FloatingActionButton } from '@components/common/FloatingActionButton';
 
-const AnnouncementsScreen = () => {
+const AnnouncementsScreen = ({ navigation }: any) => {
   const { user } = useAuthStore();
-  const [message, setMessage] = useState('');
-  const [subjectId, setSubjectId] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleCreate = async () => {
-    if (!message) {
-      Alert.alert('Error', 'Enter message');
-      return;
-    }
-    setLoading(true);
+  const loadAnnouncements = useCallback(async () => {
+    if (!user) return;
     try {
-      await announcementService.create({
-        type: 'subject',
-        subjectId: subjectId || null,
-        facultyId: user?.facultyId || null,
-        teacherId: user?.id || '',
-        message,
-        expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
-      Alert.alert('Success', 'Announcement created');
-      setMessage('');
-      setSubjectId('');
-    } catch (error) {
-      Alert.alert('Error', 'Failed');
+      const data = await AnnouncementService.getByFaculty(user.facultyId);
+      setAnnouncements(data.filter(a => a.expiresAt > Date.now()));
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    loadAnnouncements();
+  }, [loadAnnouncements]);
+
+  if (!user) return null;
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Announcements</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Subject ID (optional)"
-        value={subjectId}
-        onChangeText={setSubjectId}
+      <FlatList
+        data={announcements}
+        keyExtractor={item => item.id}
+        renderItem={({ item }) => (
+          <Card title={item.type} subtitle={item.message}>
+            <Text style={styles.date}>
+              {new Date(item.createdAt).toLocaleDateString()}
+            </Text>
+          </Card>
+        )}
+        contentContainerStyle={styles.list}
+        ListEmptyComponent={
+          <EmptyState
+            icon="📢"
+            title="No Announcements"
+            subtitle="Create your first announcement"
+            actionLabel="Create"
+            onAction={() => navigation.navigate('CreateAnnouncement')}
+          />
+        }
       />
-      <TextInput
-        style={styles.input}
-        multiline
-        placeholder="Message"
-        value={message}
-        onChangeText={setMessage}
-      />
-      <Button
-        title="Create Announcement"
-        onPress={handleCreate}
-        disabled={loading}
-      />
+      <FloatingActionButton onPress={() => navigation.navigate('CreateAnnouncement')} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.surface, padding: 16 },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.onSurface,
-    marginBottom: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.outline,
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
-    color: colors.onSurface,
-    minHeight: 80,
-  },
+  container: { flex: 1, backgroundColor: colors.surface },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.surface },
+  list: { padding: 16, paddingBottom: 100 },
+  date: { fontSize: 12, color: colors.onSurfaceVariant, marginTop: 4 },
 });
 
 export default AnnouncementsScreen;

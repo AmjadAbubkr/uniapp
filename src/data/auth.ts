@@ -1,25 +1,16 @@
-import { authInstance as auth, db } from './firebase';
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-} from './firebase';
-import {
-  doc,
-  getDoc,
-  setDoc,
-  serverTimestamp,
-} from './firebase';
-import { COLLECTIONS } from '@core/constants/collections';
+/**
+ * authService — backward-compatible wrapper around AuthModule.
+ *
+ * Existing code can continue using authService while new code uses AuthModule directly.
+ * This maintains backward compatibility while the codebase transitions.
+ */
+
+import { AuthModule } from '@core/auth';
 import { User, UserRole } from '@domain/types';
 
 export const authService = {
   login: async (email: string, password: string): Promise<User> => {
-    const result = await signInWithEmailAndPassword(auth, email, password);
-    const profile = await authService.getUserProfile(result.user.uid);
-    if (!profile) throw new Error('User profile not found');
-    return profile;
+    return AuthModule.login(email, password);
   },
 
   register: async (
@@ -29,46 +20,23 @@ export const authService = {
     name: string,
     facultyId?: string,
   ): Promise<User> => {
-    const result = await createUserWithEmailAndPassword(auth, email, password);
-
-    const user: User = {
-      id: result.user.uid,
-      email,
-      name,
-      role,
-      facultyId: facultyId || '',
-      isActive: true,
-      createdAt: Date.now(),
-    };
-
-    await setDoc(doc(db, COLLECTIONS.USERS, result.user.uid), user);
-    return user;
+    return AuthModule.register(email, password, role, name, facultyId);
   },
 
   logout: async (): Promise<void> => {
-    await signOut();
+    return AuthModule.logout();
   },
 
   getUserProfile: async (uid: string): Promise<User | null> => {
-    const docSnap = await getDoc(doc(db, COLLECTIONS.USERS, uid));
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      return { id: uid, ...data } as User;
-    }
-    return null;
+    return AuthModule.getUserProfile(uid);
   },
 
   onAuthChange: (callback: (user: User | null) => void) => {
-    return onAuthStateChanged(
-      auth,
-      async (firebaseUser: any) => {
-        if (firebaseUser) {
-          const user = await authService.getUserProfile(firebaseUser.uid);
-          callback(user);
-        } else {
-          callback(null);
-        }
-      },
-    );
+    return AuthModule.onAuthChange(callback);
+  },
+
+  hasRole: (requiredRole: UserRole): boolean => {
+    const user = AuthModule.getCurrentUser();
+    return AuthModule.hasRole(user as any, requiredRole);
   },
 };

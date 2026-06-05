@@ -2,13 +2,10 @@ import {
   getFirestore,
   collection,
   doc,
-  getDoc,
   getDocs,
   addDoc,
   updateDoc,
   deleteDoc,
-  query,
-  where,
   serverTimestamp,
 } from '@data/firebase';
 import { COLLECTIONS } from '@core/constants/collections';

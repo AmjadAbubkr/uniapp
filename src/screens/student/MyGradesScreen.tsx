@@ -1,15 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, StyleSheet, FlatList, Alert, ActivityIndicator } from 'react-native';
 import { colors } from '@core/theme/colors';
 import { useAuthStore } from '@store/authStore';
-import { gradeService } from '@data/teacher';
+import { GradeService } from '@data/services';
 import { Grade } from '@domain/types';
 
 const MyGradesScreen = () => {
@@ -18,20 +11,14 @@ const MyGradesScreen = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadGrades();
-  }, []);
+    if (!user) return;
+    GradeService.getByStudent(user.id)
+      .then(data => setGrades(data.filter(g => g.isPublished)))
+      .catch(() => Alert.alert('Error', 'Failed to load'))
+      .finally(() => setLoading(false));
+  }, [user]);
 
-  const loadGrades = async () => {
-    if (!user?.id) return;
-    try {
-      const data = await gradeService.getByStudent(user.id);
-      setGrades(data.filter(g => g.isPublished));
-    } catch (error) {
-      Alert.alert('Error', 'Failed to load');
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (!user) return null;
 
   const calculateTotal = (grade: Grade) =>
     (((grade.testScore + grade.examScore) / 40) * 100).toFixed(1);
@@ -64,26 +51,11 @@ const MyGradesScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface, padding: 16 },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.onSurface,
-    marginBottom: 16,
-  },
-  card: {
-    backgroundColor: colors.surfaceContainerHigh,
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
+  title: { fontSize: 24, fontWeight: 'bold', color: colors.onSurface, marginBottom: 16 },
+  card: { backgroundColor: colors.surfaceContainerHigh, padding: 16, borderRadius: 8, marginBottom: 8 },
   subject: { fontSize: 16, fontWeight: 'bold', color: colors.onSurface },
   score: { fontSize: 14, color: colors.onSurfaceVariant },
-  total: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.primary,
-    marginTop: 8,
-  },
+  total: { fontSize: 18, fontWeight: 'bold', color: colors.primary, marginTop: 8 },
   empty: { textAlign: 'center', color: colors.onSurfaceVariant, marginTop: 24 },
 });
 

@@ -27,7 +27,7 @@ export function PaginatedList<T>({
   fetchNextPage,
   isLoading = false,
   ListEmptyComponent,
-  ListFooterComponent,
+  ListFooterComponent: _ListFooterComponent,
 }: PaginatedListProps<T>) {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 

@@ -99,6 +99,7 @@ export interface AuditLog {
   userId: string;
   action: string;
   targetId: string;
+  level?: string;
   metadata: Record<string, any>;
   createdAt: number;
 }

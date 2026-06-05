@@ -1,6 +1,13 @@
+/**
+ * authStore — Zustand store for authentication state.
+ *
+ * Uses AuthModule for all auth operations. Maintains backward compatibility
+ * while leveraging the deep AuthModule interface.
+ */
+
 import { create } from 'zustand';
 import { User, UserRole } from '@domain/types';
-import { authService } from '@data/auth';
+import { AuthModule } from '@core/auth';
 
 interface AuthState {
   user: User | null;
@@ -21,9 +28,10 @@ interface AuthState {
     facultyId?: string,
   ) => Promise<void>;
   logout: () => Promise<void>;
+  hasRole: (requiredRole: UserRole) => boolean;
 }
 
-export const useAuthStore = create<AuthState>(set => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   is_initialized: false,
   is_loading: false,
@@ -36,7 +44,7 @@ export const useAuthStore = create<AuthState>(set => ({
   initialize: async () => {
     set({ is_loading: true, error: null });
     try {
-      authService.onAuthChange(user => {
+      AuthModule.onAuthChange(user => {
         set({ user, is_initialized: true, is_loading: false });
       });
     } catch (error: any) {
@@ -47,7 +55,7 @@ export const useAuthStore = create<AuthState>(set => ({
   login: async (email: string, password: string) => {
     set({ is_loading: true, error: null });
     try {
-      const user = await authService.login(email, password);
+      const user = await AuthModule.login(email, password);
       set({ user, is_loading: false });
     } catch (error: any) {
       set({ error: error.message, is_loading: false });
@@ -63,13 +71,7 @@ export const useAuthStore = create<AuthState>(set => ({
   ) => {
     set({ is_loading: true, error: null });
     try {
-      const user = await authService.register(
-        email,
-        password,
-        role,
-        name,
-        facultyId,
-      );
+      const user = await AuthModule.register(email, password, role, name, facultyId);
       set({ user, is_loading: false });
     } catch (error: any) {
       set({ error: error.message, is_loading: false });
@@ -79,10 +81,15 @@ export const useAuthStore = create<AuthState>(set => ({
   logout: async () => {
     set({ is_loading: true, error: null });
     try {
-      await authService.logout();
+      await AuthModule.logout();
       set({ user: null, is_loading: false });
     } catch (error: any) {
       set({ error: error.message, is_loading: false });
     }
+  },
+
+  hasRole: (requiredRole: UserRole) => {
+    const { user } = get();
+    return AuthModule.hasRole(user, requiredRole);
   },
 }));

@@ -1,5 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Button } from './Button';
 import { colors } from '@core/theme/colors';
 import { Typography } from '@core/theme/typography';

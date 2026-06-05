@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, FlatList, Alert, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Clipboard } from '@core/utils/clipboard';
+import { useAuthStore } from '@store/authStore';
 import { UserService } from '@data/services';
 import { FacultyService } from '@data/services';
 import { User, Faculty, PendingUser } from '@domain/types';
@@ -20,6 +21,7 @@ import { UserRole } from '@core/constants/roles';
 import { withTimeout, unwrapResult } from '@core/utils/async';
 
 const ManageDeansScreen = () => {
+  const { user: adminUser } = useAuthStore();
   const [deans, setDeans] = useState<User[]>([]);
   const [pending, setPending] = useState<PendingUser[]>([]);
   const [faculties, setFaculties] = useState<Faculty[]>([]);
@@ -57,6 +59,8 @@ const ManageDeansScreen = () => {
     loadFaculties();
   }, [loadDeans, loadFaculties]);
 
+  if (!adminUser) return null;
+
   const handleCreateDean = async () => {
     if (!deanName.trim()) {
       Alert.alert('Error', 'Name is required');
@@ -69,7 +73,7 @@ const ManageDeansScreen = () => {
             email: deanEmail.trim(),
             role: UserRole.DEAN,
             facultyId: selectedFacultyId,
-            createdBy: '',
+            createdBy: adminUser.id,
           },
           '',
         );

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import { colors } from '@core/theme/colors';
 import { useAuthStore } from '@store/authStore';
-import { gradeService, announcementService } from '@data/teacher';
 
 const TeacherDashboardScreen = ({ navigation }: any) => {
   const { user, logout } = useAuthStore();

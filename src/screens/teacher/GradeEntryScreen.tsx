@@ -1,17 +1,8 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  Button,
-  Alert,
-  FlatList,
-} from 'react-native';
+import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
 import { colors } from '@core/theme/colors';
 import { useAuthStore } from '@store/authStore';
-import { gradeService } from '@data/teacher';
-import { Grade } from '@domain/types';
+import { GradeService } from '@data/services';
 
 const GradeEntryScreen = () => {
   const { user } = useAuthStore();
@@ -21,6 +12,8 @@ const GradeEntryScreen = () => {
   const [examScore, setExamScore] = useState('');
   const [loading, setLoading] = useState(false);
 
+  if (!user) return null;
+
   const handleSaveGrade = async () => {
     if (!studentId || !subjectId || !testScore || !examScore) {
       Alert.alert('Error', 'Fill all fields');
@@ -28,24 +21,22 @@ const GradeEntryScreen = () => {
     }
     setLoading(true);
     try {
-      await gradeService.setGrade({
+      await GradeService.save({
         studentId,
         subjectId,
-        teacherId: user?.id || '',
+        teacherId: user.id,
         academicYearId: '',
         semesterId: '',
         testScore: parseFloat(testScore),
         examScore: parseFloat(examScore),
         isPublished: false,
-        conflictFlag: false,
-        updatedBy: user?.id || '',
-      });
+      }, user.id);
       Alert.alert('Success', 'Grade saved');
       setStudentId('');
       setSubjectId('');
       setTestScore('');
       setExamScore('');
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to save');
     } finally {
       setLoading(false);
@@ -88,20 +79,8 @@ const GradeEntryScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface, padding: 16 },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.onSurface,
-    marginBottom: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.outline,
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
-    color: colors.onSurface,
-  },
+  title: { fontSize: 24, fontWeight: 'bold', color: colors.onSurface, marginBottom: 16 },
+  input: { borderWidth: 1, borderColor: colors.outline, borderRadius: 8, padding: 12, marginBottom: 12, color: colors.onSurface },
 });
 
 export default GradeEntryScreen;
